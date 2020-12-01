@@ -12,9 +12,12 @@ def convert_PDFpage_ToStringList(myfile, pageIndex):
 
 
 def get_startEndIndex_withRegExp(stringList, regExp):
-    start_idx = [i for i, item in enumerate(stringList) if re.search(regExp[0], item)]
-    end_idx = [i for i, item in enumerate(stringList) if re.search(regExp[1], item)]
+    start_idx = [i for i, item in enumerate(
+        stringList) if re.search(regExp[0], item)]
+    end_idx = [i for i, item in enumerate(
+        stringList) if re.search(regExp[1], item)]
     return [start_idx[0], end_idx[0]]
+
 
 def get_pageIndex_withRegExp(myfile, regExp):
     reader = PdfFileReader(myfile)
@@ -40,43 +43,61 @@ def get_pageIndex_withRegExp(myfile, regExp):
         n += 1
     return n
 
-def compare_date(mpPlanString, moPlanString,regExpDate):
+
+def get_regExp_fromStringList(stringList, startIdx, endIdx):
+    n = range(startIdx, endIdx)
+    listOfInterest = [stringList[i] for i in n]
+    return ''.join(listOfInterest)
+    
+def get_stringList(stringList, startIdx, endIdx):
+    n = range(startIdx, endIdx)
+    return [stringList[i] for i in n]
+
+def compare_date(mpPlanString, moPlanString, regExpDate):
     idx = get_startEndIndex_withRegExp(mpPlanString, regExpDate)
-    #print(idx)
-    n=range(idx[0],idx[1])
-    mp_date = [mpPlanString[i] for i in n]
-    mo_date = [moPlanString[i] for i in n]
+    # print(idx)
+    n = range(idx[0], idx[1])
+    mp_date = get_regExp_fromStringList(mpPlanString, idx[0],idx[1])
+    mo_date = get_regExp_fromStringList(moPlanString, idx[0],idx[1])
     #print(mp_date)
-    #print(mo_date)
-    boolean=True
+    # print(mo_date)
+    boolean = True
     if mp_date == mo_date:
         pass
     else:
-        boolean=False
-    return boolean,mp_date,mo_date
+        boolean = False
+    return boolean, mp_date, mo_date
+
 
 firstPage = ['Plan Overview', 'not']
 chapter3 = ['Chapter ', 'Plan']
 moPDF = 'Mosaiq.pdf'
 mpPDF = 'PlanOverview.pdf'
-list_forDate=['Date Plan Saved','Created in Version']
+list_forDate = ['Date Plan Saved', 'Created in Version']
+list_prescription_mp = [['Planned Fractions', 'HFS'], ['Tracking Method', 'Alignment Center '], ['Prescribed Plan Dose ', 'Reference Point '], ['Sequential', 'Number of Segments']]
 
-#Get Page index of pdf using regular express
+# Get Page index of pdf using regular express
 i0_mosaiq = get_pageIndex_withRegExp(moPDF, firstPage)
 i0_mp = get_pageIndex_withRegExp(mpPDF, firstPage)
 i_plan_mosaiq = get_pageIndex_withRegExp(moPDF, chapter3)
 i_plan_mp = get_pageIndex_withRegExp(mpPDF, chapter3)
 
-#extract and convert the wanted page of the pdf
+# extract and convert the wanted page of the pdf
 mp_plan_string = convert_PDFpage_ToStringList(mpPDF, i_plan_mp)
 mo_plan_string = convert_PDFpage_ToStringList(moPDF, i_plan_mosaiq)
 # print(i0_mosaiq,i0_mp,i_plan_mosaiq,i_plan_mp)
 
-
-#identical date plan saved between multiplan and mosaiq ? date_output [True/False, mp_datePlan, mo_datePlan] 
-date_output = compare_date(mp_plan_string, mo_plan_string, list_forDate) 
+idx_frac = get_startEndIndex_withRegExp(mp_plan_string,list_prescription_mp[0])
+a = get_stringList(mp_plan_string,idx_frac[0],idx_frac[1])
+fraction = ' '.join([a[0],a[1],a[6]])
+path = ' '.join(get_stringList(a,7,len(a)))
+print(path, fraction)
+print(a)
+# identical date plan saved between multiplan and mosaiq ? date_output [True/False, mp_datePlan, mo_datePlan]
+date_output = compare_date(mp_plan_string, mo_plan_string, list_forDate)
 print(date_output)
-print(mp_plan_string)
+#print(mp_plan_string)
+
 
 def Extract_MainPage_toStringList(myfile, initialPage):
     reader = PdfFileReader(myfile)
