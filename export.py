@@ -87,17 +87,35 @@ mp_plan_string = convert_PDFpage_ToStringList(mpPDF, i_plan_mp)
 mo_plan_string = convert_PDFpage_ToStringList(moPDF, i_plan_mosaiq)
 # print(i0_mosaiq,i0_mp,i_plan_mosaiq,i_plan_mp)
 
+def extract_namedValue(stringList,listIndex):
+    value = ' '.join([stringList[i] for i in listIndex]) #' '.join(get_stringList(a,7,len(a)))
+    return value
+
 idx_frac = get_startEndIndex_withRegExp(mp_plan_string,list_prescription_mp[0])
-a = get_stringList(mp_plan_string,idx_frac[0],idx_frac[1])
-fraction = ' '.join([a[0],a[1],a[6]])
-path = ' '.join(get_stringList(a,7,len(a)))
-print(path, fraction)
-print(a)
+path_fraction_colli = get_stringList(mp_plan_string,idx_frac[0],idx_frac[1])
+fraction = extract_namedValue(path_fraction_colli,[0,1,6])
+path = extract_namedValue(path_fraction_colli,list(range(len(path_fraction_colli)-3,len(path_fraction_colli))))
+collimator=extract_namedValue(path_fraction_colli,[2,3,7,8])
+'''
+print(fraction)
+print(path)
+print(collimator)
+print(path_fraction_colli)'''
+
+idx_tracking = get_startEndIndex_withRegExp(mp_plan_string,list_prescription_mp[1])    
+tracking_ = get_stringList(mp_plan_string,idx_tracking[0],idx_tracking[1])
+tracking = extract_namedValue(tracking_,list(range(0,len(tracking_))))
+
+#print(tracking)
+
+idx_dose_isodose = get_startEndIndex_withRegExp(mp_plan_string,list_prescription_mp[2])    
+dose_isodose = get_stringList(mp_plan_string,idx_dose_isodose 0],idx_dose_isodose 1])
+print(tracking_)
+
 # identical date plan saved between multiplan and mosaiq ? date_output [True/False, mp_datePlan, mo_datePlan]
 date_output = compare_date(mp_plan_string, mo_plan_string, list_forDate)
-print(date_output)
+#print(date_output)
 #print(mp_plan_string)
-
 
 def Extract_MainPage_toStringList(myfile, initialPage):
     reader = PdfFileReader(myfile)
