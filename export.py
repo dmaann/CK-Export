@@ -71,85 +71,118 @@ def compare_date(mpPlanString, moPlanString, regExpDate):
     return boolean, mp_date, mo_date
 
 
+def extract_namedValue(stringList, listIndex):
+    # ' '.join(get_stringList(a,7,len(a)))
+    value = ' '.join([stringList[i] for i in listIndex])
+    return value
+
+
+def extract_dataPlan(planString, listDataPlan):
+    idx_frac = get_startEndIndex_withRegExp(planString, listDataPlan[0])
+    path_fraction_colli = get_stringList(planString, idx_frac[0], idx_frac[1])
+    fraction = extract_namedValue(path_fraction_colli, [0, 1, 6])
+    path = extract_namedValue(path_fraction_colli, list(
+        range(len(path_fraction_colli)-3, len(path_fraction_colli))))
+    collimator = extract_namedValue(path_fraction_colli, [2, 3, 7, 8])
+    '''print(fraction, '\n', path, '\n', collimator)
+    print(path_fraction_colli)'''
+
+    idx_tracking = get_startEndIndex_withRegExp(
+        planString, listDataPlan[1])
+    tracking_ = get_stringList(
+        planString, idx_tracking[0], idx_tracking[1])
+    tracking = extract_namedValue(tracking_, list(range(0, len(tracking_))))
+    # print(tracking)
+
+    idx_dose_isodose = get_startEndIndex_withRegExp(
+        planString, listDataPlan[2])
+    dose_isodose = get_stringList(
+        planString, idx_dose_isodose[0], idx_dose_isodose[1])
+    dose = extract_namedValue(dose_isodose, [0, 7, 4, 2])
+    isodose = extract_namedValue(dose_isodose, [6, 7, 8, 5])
+    '''print(dose, '\n', isodose)
+    print(dose_isodose)'''
+
+    idx_algo_segment = get_startEndIndex_withRegExp(
+        planString, listDataPlan[3])
+    algo_segment = get_stringList(
+        planString, idx_algo_segment[0], idx_algo_segment[1])
+    algorithm = extract_namedValue(algo_segment, list(range(0, 3)))
+    scaling = extract_namedValue(algo_segment, list(range(3, 6)))
+    segment = extract_namedValue(algo_segment, list(range(6, 9)))
+    '''print(algorithm, '\n', scaling, '\n', segment)
+    print(algo_segment)'''
+
+    idx_time_beam = get_startEndIndex_withRegExp(planString, listDataPlan[4])
+    time_beam = get_stringList(planString, idx_time_beam[0], idx_time_beam[1])
+    resolution = extract_namedValue(time_beam, list(range(0, 3)))
+    time = extract_namedValue(time_beam, [11, 1, 15, 13])
+    beam = extract_namedValue(time_beam, [9, 1, 8])
+    '''print(resolution, '\n', time, '\n', beam)
+    print(time_beam)'''
+
+    majorPagePlan = [fraction, dose, isodose, tracking, scaling]
+    minorPagePlan = [collimator, path, algorithm,
+                     resolution, time, beam, segment]
+    return majorPagePlan, minorPagePlan
+
+
+def extractPatientData(patientString, regExpList):
+    idx_patient = get_startEndIndex_withRegExp(patientString, regExpList[0])
+    patient_data = get_stringList(
+        patientString, idx_patient[0], idx_patient[1])
+    # print(patient_data)
+    name = extract_namedValue(patient_data, [0, 1, 2, 3, 4, 8])
+    id_ = extract_namedValue(patient_data, list(
+        range(len(patient_data)-4, len(patient_data)-1)))
+    plan_name = extract_namedValue(patient_data, [5, 6, 7])
+
+    idx_status = get_startEndIndex_withRegExp(patientString, regExpList[1])
+    plan_status = get_stringList(patientString, idx_status[0], idx_status[1]+1)
+    idx_position = [0, 1]
+    idx_position.extend(list(range(4, len(plan_status)-1)))
+    plan_name = extract_namedValue(plan_status, idx_position)
+    # print(plan_status)
+    status = extract_namedValue(plan_status, [2, 3, len(plan_status)-1])
+    #print(name, '\n', id_, '\n', plan_name, '\n', status)
+    majorCheck = [name, id_, plan_name, status]
+    print(majorCheck)
+    return majorCheck
+
+
 firstPage = ['Plan Overview', 'not']
+chapter1 = ['Chapter ', 'Overview']
 chapter3 = ['Chapter ', 'Plan']
 moPDF = 'Mosaiq.pdf'
 mpPDF = 'PlanOverview.pdf'
 list_forDate = ['Date Plan Saved', 'Created in Version']
-list_prescription_mp = [['Planned Fractions', 'HFS'], ['Tracking Method', 'Alignment Center '], [
+list_data_plan = [['Planned Fractions', 'HFS'], ['Tracking Method', 'Alignment Center '], [
     'Prescribed Plan Dose ', 'Reference Point '], ['Optimization Algorithm', 'Page'], ['Dose Calculation Resolution', 'dose Beams']]
+#list_data_CT = ['Last Name', 'Deliverable']
+regExp_patient = [['Last Name', 'Plan Summary'], ['Plan Name', 'Deliverable']]
+
+i_patient_data = get_pageIndex_withRegExp(moPDF, chapter1)
+list_patient_data = convert_PDFpage_ToStringList(moPDF, i_patient_data)
+
 
 # Get Page index of pdf using regular express
 i0_mosaiq = get_pageIndex_withRegExp(moPDF, firstPage)
 i0_mp = get_pageIndex_withRegExp(mpPDF, firstPage)
+
 i_plan_mosaiq = get_pageIndex_withRegExp(moPDF, chapter3)
 i_plan_mp = get_pageIndex_withRegExp(mpPDF, chapter3)
 
 # extract and convert the wanted page of the pdf
 mp_plan_string = convert_PDFpage_ToStringList(mpPDF, i_plan_mp)
 mo_plan_string = convert_PDFpage_ToStringList(moPDF, i_plan_mosaiq)
+mo_patient_string = convert_PDFpage_ToStringList(moPDF, i0_mosaiq)
+# print(mo_patient_string)
+
 # print(i0_mosaiq,i0_mp,i_plan_mosaiq,i_plan_mp)
 
-
-def extract_namedValue(stringList, listIndex):
-    # ' '.join(get_stringList(a,7,len(a)))
-    value = ' '.join([stringList[i] for i in listIndex])
-    return value
-
-def extract_dataPlan(mpPlanString, list_prescription):
-    idx_frac = get_startEndIndex_withRegExp(
-        mp_plan_string, list_prescription_mp[0])
-    path_fraction_colli = get_stringList(
-        mp_plan_string, idx_frac[0], idx_frac[1])
-    fraction = extract_namedValue(path_fraction_colli, [0, 1, 6])
-    path = extract_namedValue(path_fraction_colli, list(
-        range(len(path_fraction_colli)-3, len(path_fraction_colli))))
-    collimator = extract_namedValue(path_fraction_colli, [2, 3, 7, 8])
-    print(fraction, '\n', path, '\n',collimator)
-    #print(path_fraction_colli)
-
-    idx_tracking = get_startEndIndex_withRegExp(
-        mp_plan_string, list_prescription_mp[1])
-    tracking_ = get_stringList(
-        mp_plan_string, idx_tracking[0], idx_tracking[1])
-    tracking = extract_namedValue(tracking_, list(range(0, len(tracking_))))
-
-    # print(tracking)
-
-    idx_dose_isodose = get_startEndIndex_withRegExp(
-        mp_plan_string, list_prescription_mp[2])
-    dose_isodose = get_stringList(
-        mp_plan_string, idx_dose_isodose[0], idx_dose_isodose[1])
-    dose = extract_namedValue(dose_isodose, [0, 7, 4, 2])
-    isodose = extract_namedValue(dose_isodose, [6, 7, 8, 5])
-    print(dose, '\n', isodose)
-    # print(dose_isodose)
-
-    idx_algo_segment = get_startEndIndex_withRegExp(
-        mp_plan_string, list_prescription_mp[3])
-    algo_segment = get_stringList(
-        mp_plan_string, idx_algo_segment[0], idx_algo_segment[1])
-    algorithm = extract_namedValue(algo_segment, list(range(0, 3)))
-    scaling = extract_namedValue(algo_segment, list(range(3, 6)))
-    segment = extract_namedValue(algo_segment, list(range(6, 9)))
-
-    '''print(algorithm)
-    print(scaling)
-    print(segment)
-    print(algo_segment)'''
-
-    idx_time_beam = get_startEndIndex_withRegExp(
-        mp_plan_string, list_prescription_mp[4])
-    time_beam = get_stringList(
-        mp_plan_string, idx_time_beam[0], idx_time_beam[1])
-    resolution = extract_namedValue(time_beam, list(range(0, 3)))
-    time = extract_namedValue(time_beam, [11, 1, 15, 13])
-    beam = extract_namedValue(time_beam, [9, 1, 8])
-    print(resolution, '\n', time, '\n',beam)
-    #print(time_beam)
-    
-
-extract_dataPlan(mp_plan_string, list_prescription_mp)
+major_patient_data = extractPatientData(list_patient_data, regExp_patient)
+major_plan_data, minor_plan_data = extract_dataPlan(
+    mp_plan_string, list_data_plan)
 # identical date plan saved between multiplan and mosaiq ? date_output [True/False, mp_datePlan, mo_datePlan]
 date_output = compare_date(mp_plan_string, mo_plan_string, list_forDate)
 # print(date_output)
@@ -180,7 +213,6 @@ def Fitted_MosaiqPDF_toMultiplanPDF(myfile, numberOfPages, start):
 
 
 def Get_MultiplanPDF_NumberOfPages(myfile):
-
     reader = PdfFileReader(myfile)
     num_of_pages = reader.numPages
     print(reader.documentInfo)
