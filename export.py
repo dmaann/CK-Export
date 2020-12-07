@@ -105,12 +105,8 @@ def extract_dataPlan(mpPlanString, list_prescription):
     path = extract_namedValue(path_fraction_colli, list(
         range(len(path_fraction_colli)-3, len(path_fraction_colli))))
     collimator = extract_namedValue(path_fraction_colli, [2, 3, 7, 8])
-    '''
-    print(fraction)
-    print(path)
-    print(collimator)
-    print(path_fraction_colli)
-    '''
+    print(fraction, '\n', path, '\n',collimator)
+    #print(path_fraction_colli)
 
     idx_tracking = get_startEndIndex_withRegExp(
         mp_plan_string, list_prescription_mp[1])
@@ -126,8 +122,7 @@ def extract_dataPlan(mpPlanString, list_prescription):
         mp_plan_string, idx_dose_isodose[0], idx_dose_isodose[1])
     dose = extract_namedValue(dose_isodose, [0, 7, 4, 2])
     isodose = extract_namedValue(dose_isodose, [6, 7, 8, 5])
-    # print(isodose)
-    # print(dose)
+    print(dose, '\n', isodose)
     # print(dose_isodose)
 
     idx_algo_segment = get_startEndIndex_withRegExp(
@@ -150,12 +145,8 @@ def extract_dataPlan(mpPlanString, list_prescription):
     resolution = extract_namedValue(time_beam, list(range(0, 3)))
     time = extract_namedValue(time_beam, [11, 1, 15, 13])
     beam = extract_namedValue(time_beam, [9, 1, 8])
-
-    
-    print(resolution)
-    print(time)
-    print(beam)
-    print(time_beam)
+    print(resolution, '\n', time, '\n',beam)
+    #print(time_beam)
     
 
 extract_dataPlan(mp_plan_string, list_prescription_mp)
