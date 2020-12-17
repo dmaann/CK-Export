@@ -207,8 +207,8 @@ major_patient_data = extractPatientData(list_patient_data, regExp_patient)
 major_plan_data, minor_plan_data = extract_dataPlan(
     mp_plan_string, list_data_plan)
 # identical date plan saved between multiplan and mosaiq ? date_output [True/False, mp_datePlan, mo_datePlan]
-date_output = compare_date(mp_plan_string, mo_plan_string, list_forDate)
-# print(date_output)
+date_output = compare_date(mp_plan_string, mo_plan_string, list_forDate)#
+print(date_output)
 # print(mp_plan_string)
 
 
