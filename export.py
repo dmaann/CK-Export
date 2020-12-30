@@ -58,17 +58,19 @@ def get_stringList(stringList, startIdx, endIdx):
 def compare_date(planString, moPlanString, regExpDate):
     idx = get_startEndIndex_withRegExp(planString, regExpDate)
     # print(idx)
-    n = range(idx[0], idx[1])
-    mp_date = get_regExp_fromStringList(planString, idx[0], idx[1])
-    mo_date = get_regExp_fromStringList(planString, idx[0], idx[1])
-    # print(mp_date)
+    #n = range(idx[0], idx[1])
+    mp_date = get_regExp_fromStringList(planString, idx[0]+2, idx[1])
+    mo_date = get_regExp_fromStringList(planString, idx[0]+2, idx[1])
+    #mp_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
+    #mo_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
+    print(mp_date)
     # print(mo_date)
     boolean = True
     if mp_date == mo_date:
         pass
     else:
         boolean = False
-    return boolean, mp_date, mo_date
+    return [boolean, mp_date, mo_date], ['Dates de génération des pdf identiques : ' + str(boolean), 'Date du pdf de Multiplan : ' + str(mp_date), 'Date du pdf Mosaiq :       ' + str(mo_date)]
 
 
 def extract_namedValue(stringList, listIndex):
@@ -124,6 +126,8 @@ def extract_dataPlan(planString, regExpPlan):
     majorPagePlan = [fraction, dose, isodose, tracking, scaling]
     minorPagePlan = [collimator, path, algorithm,
                      resolution, time, beam, segment]
+    # print(majorPagePlan)
+    # print(minorPagePlan)
     return majorPagePlan, minorPagePlan
 
 
@@ -133,6 +137,8 @@ def extractPatientData(patientString, regExpList):
         patientString, idx_patient[0], idx_patient[1])
     # print(patient_data)
     name = extract_namedValue(patient_data, [0, 1, 2, 3, 4, 8])
+    nameForOutputFile = extract_namedValue(patient_data, [ 2])
+    #print(nameForOutputFile)
     id_ = extract_namedValue(patient_data, list(
         range(len(patient_data)-4, len(patient_data)-1)))
     plan_name = extract_namedValue(patient_data, [5, 6, 7])
@@ -146,38 +152,62 @@ def extractPatientData(patientString, regExpList):
     status = extract_namedValue(plan_status, [2, 3, len(plan_status)-1])
     #print(name, '\n', id_, '\n', plan_name, '\n', status)
     majorCheck = [name, id_, plan_name, status]
-    #print(majorCheck)
-    return majorCheck
+    # print(majorCheck)
+    return majorCheck,nameForOutputFile 
 
-def extractCTData(CTString,regExpList):
+
+def extractCTData(CTString, regExpList):
     idx_CT_date = get_startEndIndex_withRegExp(CTString, regExpList[0])
     CT_date = get_stringList(CTString, idx_CT_date[0], idx_CT_date[1])
-    #print(CT_date)
+    # print(CT_date)
     idx_position = [0, 1]
     idx_position.extend(list(range(6, len(CT_date)-1)))
     date = extract_namedValue(CT_date, idx_position)
-    #print(date)
+    # print(date)
     idx_CT_protocol = get_startEndIndex_withRegExp(CTString, regExpList[1])
-    CT_protocol = get_stringList(CTString, idx_CT_protocol[0], idx_CT_protocol[1])
-    #print(CT_protocol)
+    CT_protocol = get_stringList(
+        CTString, idx_CT_protocol[0], idx_CT_protocol[1])
+    # print(CT_protocol)
     idx_position = [2, 3]
     idx_position.extend(list(range(6, len(CT_protocol)-2)))
     protocol = extract_namedValue(CT_protocol, idx_position)
-    #print(protocol)
-    majorCheck = [date,protocol]
-    #print(majorCheck)
+    # print(protocol)
+    majorCheck = [date, protocol]
+    # print(majorCheck)
     return majorCheck
+
+
+def makeReadableMessage(myList):
+    msg = '\n'.join([str(i) for i in myList])
+    # print(msg)
+    return msg
+
+
+def writeFile(strMajorList, strMinorList,patientName):
+    majorChecks = '\n'+'VERIFICATIONS MAJEURES : '
+    minChecks = '\n'+'VERIFICATIONS MINEURES : '
+    strMajorList.insert(0, majorChecks)
+    strMinorList.insert(0, minChecks)
+    finalList = strMajorList + strMinorList
+    finalString = '\n\n'.join([str(i) for i in finalList])
+    fileName = 'ExportCK-'+ str(patientName)+'.txt'
+    MyFile = open(fileName, 'w')
+    MyFile.writelines(finalString)
+    MyFile.close()
+    # print(finalString)
+
 
 firstPage = ['Plan Overview', 'not']
 chapter1 = ['Chapter ', 'Overview']
-chapter2 = ['DICOM Series','2: ']
+chapter2 = ['DICOM Series', '2: ']
 chapter3 = ['Chapter ', 'Plan']
 moPDF = 'Mosaiq.pdf'
+#moPDF = 'JacquetMosaiq.pdf'
 mpPDF = 'PlanOverview.pdf'
 list_forDate = ['Date Plan Saved', 'Created in Version']
 list_data_plan = [['Planned Fractions', 'HFS'], ['Tracking Method', 'Alignment Center '], [
     'Prescribed Plan Dose ', 'Reference Point '], ['Optimization Algorithm', 'Page'], ['Dose Calculation Resolution', 'dose Beams']]
-regExp_CT = [['Scan Date', 'hr'],['Study UID','Plan Overview']]
+regExp_CT = [['Scan Date', 'hr'], ['Study UID', 'Plan Overview']]
 regExp_patient = [['Last Name', 'Plan Summary'], ['Plan Name', 'Deliverable']]
 
 i_patient_data = get_pageIndex_withRegExp(moPDF, chapter1)
@@ -185,8 +215,8 @@ list_patient_data = convert_PDFpage_ToStringList(moPDF, i_patient_data)
 
 i_CT_data = get_pageIndex_withRegExp(moPDF, chapter2)
 list_CT_data_protocol = convert_PDFpage_ToStringList(moPDF, i_CT_data)
-#print(list_CT_data_protocol)
-    
+# print(list_CT_data_protocol)
+
 
 # Get Page index of pdf using regular express
 #i0_mosaiq = get_pageIndex_withRegExp(moPDF, firstPage)
@@ -202,13 +232,25 @@ mo_plan_string = convert_PDFpage_ToStringList(moPDF, i_plan_mosaiq)
 # print(mo_patient_string)
 
 # print(i0_mosaiq,i0_mp,i_plan_mosaiq,i_plan_mp)
-major_CT_data = extractCTData(list_CT_data_protocol,regExp_CT)
-major_patient_data = extractPatientData(list_patient_data, regExp_patient)
+major_CT_data = extractCTData(list_CT_data_protocol, regExp_CT)
+major_patient_data,patient_name_Output_file  = extractPatientData(list_patient_data, regExp_patient)
 major_plan_data, minor_plan_data = extract_dataPlan(
-    mp_plan_string, list_data_plan)
+    mo_plan_string, list_data_plan)
 # identical date plan saved between multiplan and mosaiq ? date_output [True/False, mp_datePlan, mo_datePlan]
-date_output = compare_date(mp_plan_string, mo_plan_string, list_forDate)#
-print(date_output)
+row_date_data, date_output = compare_date(
+    mp_plan_string, mo_plan_string, list_forDate)
+
+message_CT_major = makeReadableMessage(major_CT_data)
+message_date_major = makeReadableMessage(date_output)
+message_patient_major = makeReadableMessage(major_patient_data)
+message_plan_minor = makeReadableMessage(minor_plan_data)
+message_plan_major = makeReadableMessage(major_plan_data)
+
+all_major_messages = [message_date_major, message_patient_major,
+                      message_plan_major, message_CT_major]
+all_minor_messages = [message_plan_minor]
+writeFile(all_major_messages, all_minor_messages,patient_name_Output_file)
+# print(date_output)
 # print(mp_plan_string)
 
 
