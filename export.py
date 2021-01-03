@@ -57,20 +57,23 @@ def get_stringList(stringList, startIdx, endIdx):
 
 def compare_date(planString, moPlanString, regExpDate):
     idx = get_startEndIndex_withRegExp(planString, regExpDate)
-    # print(idx)
+    print(idx)
     #n = range(idx[0], idx[1])
     mp_date = get_regExp_fromStringList(planString, idx[0]+2, idx[1])
-    mo_date = get_regExp_fromStringList(planString, idx[0]+2, idx[1])
+    mo_date = get_regExp_fromStringList(moPlanString, idx[0]+2, idx[1])
     #mp_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
     #mo_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
     print(mp_date)
-    # print(mo_date)
+    print(mo_date)
     boolean = True
     if mp_date == mo_date:
-        pass
+        writableOutput = ['Date sauvegarde du plan identiques ? : ' + str(
+            boolean), 'Date du pdf de Multiplan : ' + str(mp_date), 'Date du pdf Mosaiq :       ' + str(mo_date)]
     else:
         boolean = False
-    return [boolean, mp_date, mo_date], ['Dates de génération des pdf identiques : ' + str(boolean), 'Date du pdf de Multiplan : ' + str(mp_date), 'Date du pdf Mosaiq :       ' + str(mo_date)]
+        writableOutput = ['PROBLEME : VERIFIER LA CONCORDANCE DU PLAN ET DES PDF','', 'Date sauvegarde du plan identiques ? : ' + str(boolean),
+                        'Date du pdf de Multiplan : ' + str(mp_date), 'Date du pdf Mosaiq :       ' + str(mo_date)]
+    return [boolean, mp_date, mo_date], writableOutput
 
 
 def extract_namedValue(stringList, listIndex):
@@ -105,16 +108,6 @@ def extract_dataPlan(planString, regExpPlan):
     '''print(dose, '\n', isodose)
     print(dose_isodose)'''
 
-    idx_algo_segment = get_startEndIndex_withRegExp(
-        planString, regExpPlan[3])
-    algo_segment = get_stringList(
-        planString, idx_algo_segment[0], idx_algo_segment[1])
-    algorithm = extract_namedValue(algo_segment, list(range(0, 3)))
-    scaling = extract_namedValue(algo_segment, list(range(3, 6)))
-    segment = extract_namedValue(algo_segment, list(range(6, 9)))
-    '''print(algorithm, '\n', scaling, '\n', segment)
-    print(algo_segment)'''
-
     idx_time_beam = get_startEndIndex_withRegExp(planString, regExpPlan[4])
     time_beam = get_stringList(planString, idx_time_beam[0], idx_time_beam[1])
     resolution = extract_namedValue(time_beam, list(range(0, 3)))
@@ -123,9 +116,24 @@ def extract_dataPlan(planString, regExpPlan):
     '''print(resolution, '\n', time, '\n', beam)
     print(time_beam)'''
 
+    idx_algo_segment = get_startEndIndex_withRegExp(
+        planString, regExpPlan[3])
+    algo_segment = get_stringList(
+        planString, idx_algo_segment[0], idx_algo_segment[1])
+    algorithm = extract_namedValue(algo_segment, list(range(0, 3)))
+    scaling = extract_namedValue(algo_segment, list(range(3, 6)))
+    r = re.compile(".*MLC")
+    isMLC = list(filter(r.match, mo_plan_string))
+    if not isMLC:  # empty list, i.e. fixed collimator
+        minorPagePlan = [collimator, path, algorithm,
+                         resolution, time, beam]
+    else:  # MLC collimator
+        segment = extract_namedValue(algo_segment, list(range(6, 9)))
+        minorPagePlan = [collimator, path, algorithm,
+                         resolution, time, beam, segment]
+    '''print(algorithm, '\n', scaling, '\n', segment)
+    print(algo_segment)'''
     majorPagePlan = [fraction, dose, isodose, tracking, scaling]
-    minorPagePlan = [collimator, path, algorithm,
-                     resolution, time, beam, segment]
     # print(majorPagePlan)
     # print(minorPagePlan)
     return majorPagePlan, minorPagePlan
@@ -137,8 +145,8 @@ def extractPatientData(patientString, regExpList):
         patientString, idx_patient[0], idx_patient[1])
     # print(patient_data)
     name = extract_namedValue(patient_data, [0, 1, 2, 3, 4, 8])
-    nameForOutputFile = extract_namedValue(patient_data, [ 2])
-    #print(nameForOutputFile)
+    nameForOutputFile = extract_namedValue(patient_data, [2])
+    # print(nameForOutputFile)
     id_ = extract_namedValue(patient_data, list(
         range(len(patient_data)-4, len(patient_data)-1)))
     plan_name = extract_namedValue(patient_data, [5, 6, 7])
@@ -153,7 +161,7 @@ def extractPatientData(patientString, regExpList):
     #print(name, '\n', id_, '\n', plan_name, '\n', status)
     majorCheck = [name, id_, plan_name, status]
     # print(majorCheck)
-    return majorCheck,nameForOutputFile 
+    return majorCheck, nameForOutputFile
 
 
 def extractCTData(CTString, regExpList):
@@ -183,14 +191,14 @@ def makeReadableMessage(myList):
     return msg
 
 
-def writeFile(strMajorList, strMinorList,patientName):
+def writeFile(strMajorList, strMinorList, patientName):
     majorChecks = '\n'+'VERIFICATIONS MAJEURES : '
     minChecks = '\n'+'VERIFICATIONS MINEURES : '
     strMajorList.insert(0, majorChecks)
     strMinorList.insert(0, minChecks)
     finalList = strMajorList + strMinorList
     finalString = '\n\n'.join([str(i) for i in finalList])
-    fileName = 'ExportCK-'+ str(patientName)+'.txt'
+    fileName = 'ExportCK-' + str(patientName)+'.txt'
     MyFile = open(fileName, 'w')
     MyFile.writelines(finalString)
     MyFile.close()
@@ -202,7 +210,7 @@ chapter1 = ['Chapter ', 'Overview']
 chapter2 = ['DICOM Series', '2: ']
 chapter3 = ['Chapter ', 'Plan']
 moPDF = 'Mosaiq.pdf'
-#moPDF = 'JacquetMosaiq.pdf'
+moPDF = 'JacquetMosaiq.pdf'
 mpPDF = 'PlanOverview.pdf'
 list_forDate = ['Date Plan Saved', 'Created in Version']
 list_data_plan = [['Planned Fractions', 'HFS'], ['Tracking Method', 'Alignment Center '], [
@@ -229,11 +237,13 @@ i_plan_mp = get_pageIndex_withRegExp(mpPDF, chapter3)
 mp_plan_string = convert_PDFpage_ToStringList(mpPDF, i_plan_mp)
 mo_plan_string = convert_PDFpage_ToStringList(moPDF, i_plan_mosaiq)
 #mo_patient_string = convert_PDFpage_ToStringList(moPDF, i0_mosaiq)
-# print(mo_patient_string)
+print(mo_plan_string)
+
 
 # print(i0_mosaiq,i0_mp,i_plan_mosaiq,i_plan_mp)
 major_CT_data = extractCTData(list_CT_data_protocol, regExp_CT)
-major_patient_data,patient_name_Output_file  = extractPatientData(list_patient_data, regExp_patient)
+major_patient_data, patient_name_Output_file = extractPatientData(
+    list_patient_data, regExp_patient)
 major_plan_data, minor_plan_data = extract_dataPlan(
     mo_plan_string, list_data_plan)
 # identical date plan saved between multiplan and mosaiq ? date_output [True/False, mp_datePlan, mo_datePlan]
@@ -249,7 +259,11 @@ message_plan_major = makeReadableMessage(major_plan_data)
 all_major_messages = [message_date_major, message_patient_major,
                       message_plan_major, message_CT_major]
 all_minor_messages = [message_plan_minor]
-writeFile(all_major_messages, all_minor_messages,patient_name_Output_file)
+'''
+all_major_messages = [message_date_major, message_patient_major,
+                       message_CT_major]
+all_minor_messages = []'''
+writeFile(all_major_messages, all_minor_messages, patient_name_Output_file)
 # print(date_output)
 # print(mp_plan_string)
 
