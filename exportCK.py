@@ -57,22 +57,22 @@ def get_stringList(stringList, startIdx, endIdx):
 
 def compare_date(planString, moPlanString, regExpDate):
     idx = get_startEndIndex_withRegExp(planString, regExpDate)
-    print(idx)
+    #print(idx)
     #n = range(idx[0], idx[1])
     mp_date = get_regExp_fromStringList(planString, idx[0]+2, idx[1])
     mo_date = get_regExp_fromStringList(moPlanString, idx[0]+2, idx[1])
     #mp_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
     #mo_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
-    print(mp_date)
-    print(mo_date)
+    #print(mp_date)
+    #print(mo_date)
     boolean = True
     if mp_date == mo_date:
         writableOutput = ['Date sauvegarde du plan identiques ? : ' + str(
             boolean), 'Date du pdf de Multiplan : ' + str(mp_date), 'Date du pdf Mosaiq :       ' + str(mo_date)]
     else:
         boolean = False
-        writableOutput = ['PROBLEME : VERIFIER LA CONCORDANCE DU PLAN ET DES PDF','', 'Date sauvegarde du plan identiques ? : ' + str(boolean),
-                        'Date du pdf de Multiplan : ' + str(mp_date), 'Date du pdf Mosaiq :       ' + str(mo_date)]
+        writableOutput = ['PROBLEME : VERIFIER LA CONCORDANCE DU PLAN ET DES PDF', '', 'Date sauvegarde du plan identiques ? : ' + str(boolean),
+                          'Date du pdf de Multiplan : ' + str(mp_date), 'Date du pdf Mosaiq :       ' + str(mo_date)]
     return [boolean, mp_date, mo_date], writableOutput
 
 
@@ -84,19 +84,21 @@ def extract_namedValue(stringList, listIndex):
 
 def extract_dataPlan(planString, regExpPlan):
     idx_frac = get_startEndIndex_withRegExp(planString, regExpPlan[0])
-    path_fraction_colli = get_stringList(planString, idx_frac[0], idx_frac[1])
+    path_fraction_colli = get_stringList(
+        planString, idx_frac[0], idx_frac[1])
     fraction = extract_namedValue(path_fraction_colli, [0, 1, 6])
     path = extract_namedValue(path_fraction_colli, list(
         range(len(path_fraction_colli)-3, len(path_fraction_colli))))
     collimator = extract_namedValue(path_fraction_colli, [2, 3, 7, 8])
     '''print(fraction, '\n', path, '\n', collimator)
-    print(path_fraction_colli)'''
+        print(path_fraction_colli)'''
 
     idx_tracking = get_startEndIndex_withRegExp(
         planString, regExpPlan[1])
     tracking_ = get_stringList(
         planString, idx_tracking[0], idx_tracking[1])
-    tracking = extract_namedValue(tracking_, list(range(0, len(tracking_))))
+    tracking = extract_namedValue(
+        tracking_, list(range(0, len(tracking_))))
     # print(tracking)
 
     idx_dose_isodose = get_startEndIndex_withRegExp(
@@ -106,15 +108,16 @@ def extract_dataPlan(planString, regExpPlan):
     dose = extract_namedValue(dose_isodose, [0, 7, 4, 2])
     isodose = extract_namedValue(dose_isodose, [6, 7, 8, 5])
     '''print(dose, '\n', isodose)
-    print(dose_isodose)'''
+        print(dose_isodose)'''
 
     idx_time_beam = get_startEndIndex_withRegExp(planString, regExpPlan[4])
-    time_beam = get_stringList(planString, idx_time_beam[0], idx_time_beam[1])
+    time_beam = get_stringList(
+        planString, idx_time_beam[0], idx_time_beam[1])
     resolution = extract_namedValue(time_beam, list(range(0, 3)))
     time = extract_namedValue(time_beam, [11, 1, 15, 13])
     beam = extract_namedValue(time_beam, [9, 1, 8])
     '''print(resolution, '\n', time, '\n', beam)
-    print(time_beam)'''
+        print(time_beam)'''
 
     idx_algo_segment = get_startEndIndex_withRegExp(
         planString, regExpPlan[3])
@@ -123,7 +126,7 @@ def extract_dataPlan(planString, regExpPlan):
     algorithm = extract_namedValue(algo_segment, list(range(0, 3)))
     scaling = extract_namedValue(algo_segment, list(range(3, 6)))
     r = re.compile(".*MLC")
-    isMLC = list(filter(r.match, mo_plan_string))
+    isMLC = list(filter(r.match, planString))
     if not isMLC:  # empty list, i.e. fixed collimator
         minorPagePlan = [collimator, path, algorithm,
                          resolution, time, beam]
@@ -132,7 +135,7 @@ def extract_dataPlan(planString, regExpPlan):
         minorPagePlan = [collimator, path, algorithm,
                          resolution, time, beam, segment]
     '''print(algorithm, '\n', scaling, '\n', segment)
-    print(algo_segment)'''
+        print(algo_segment)'''
     majorPagePlan = [fraction, dose, isodose, tracking, scaling]
     # print(majorPagePlan)
     # print(minorPagePlan)
@@ -140,7 +143,8 @@ def extract_dataPlan(planString, regExpPlan):
 
 
 def extractPatientData(patientString, regExpList):
-    idx_patient = get_startEndIndex_withRegExp(patientString, regExpList[0])
+    idx_patient = get_startEndIndex_withRegExp(
+        patientString, regExpList[0])
     patient_data = get_stringList(
         patientString, idx_patient[0], idx_patient[1])
     # print(patient_data)
@@ -152,7 +156,8 @@ def extractPatientData(patientString, regExpList):
     plan_name = extract_namedValue(patient_data, [5, 6, 7])
 
     idx_status = get_startEndIndex_withRegExp(patientString, regExpList[1])
-    plan_status = get_stringList(patientString, idx_status[0], idx_status[1]+1)
+    plan_status = get_stringList(
+        patientString, idx_status[0], idx_status[1]+1)
     idx_position = [0, 1]
     idx_position.extend(list(range(4, len(plan_status)-1)))
     plan_name = extract_namedValue(plan_status, idx_position)
@@ -191,119 +196,87 @@ def makeReadableMessage(myList):
     return msg
 
 
-def writeFile(strMajorList, strMinorList, patientName):
-    majorChecks = '\n'+'VERIFICATIONS MAJEURES : '
-    minChecks = '\n'+'VERIFICATIONS MINEURES : '
-    strMajorList.insert(0, majorChecks)
-    strMinorList.insert(0, minChecks)
-    finalList = strMajorList + strMinorList
-    finalString = '\n\n'.join([str(i) for i in finalList])
-    fileName = 'ExportCK-' + str(patientName)+'.txt'
-    MyFile = open(fileName, 'w')
-    MyFile.writelines(finalString)
-    MyFile.close()
-    # print(finalString)
+class ExportCyberknife:
 
+    def __init__(self, moPDF, mpPDF, outputDirectory):
+        self.moPDF = moPDF
+        self.mpPDF = mpPDF
+        self.outputDirectory = outputDirectory
+        #firstPage = ['Plan Overview', 'not']
+        self.chapter1 = ['Chapter ', 'Overview']
+        self.chapter2 = ['DICOM Series', '2: ']
+        self.chapter3 = ['Chapter ', 'Plan']
+        self.list_forDate = ['Date Plan Saved', 'Created in Version']
+        self.list_data_plan = [['Planned Fractions', 'HFS'], ['Tracking Method', 'Alignment Center '], [
+            'Prescribed Plan Dose ', 'Reference Point '], ['Optimization Algorithm', 'Page'], ['Dose Calculation Resolution', 'dose Beams']]
+        self.regExp_CT = [['Scan Date', 'hr'], ['Study UID', 'Plan Overview']]
+        self.regExp_patient = [['Last Name', 'Plan Summary'],
+                               ['Plan Name', 'Deliverable']]
+        self.all_major_messages = []
+        self.all_minor_messages = []
+        self.patient_name = ''
 
-firstPage = ['Plan Overview', 'not']
-chapter1 = ['Chapter ', 'Overview']
-chapter2 = ['DICOM Series', '2: ']
-chapter3 = ['Chapter ', 'Plan']
-moPDF = 'Mosaiq.pdf'
-moPDF = 'JacquetMosaiq.pdf'
-mpPDF = 'PlanOverview.pdf'
-list_forDate = ['Date Plan Saved', 'Created in Version']
-list_data_plan = [['Planned Fractions', 'HFS'], ['Tracking Method', 'Alignment Center '], [
-    'Prescribed Plan Dose ', 'Reference Point '], ['Optimization Algorithm', 'Page'], ['Dose Calculation Resolution', 'dose Beams']]
-regExp_CT = [['Scan Date', 'hr'], ['Study UID', 'Plan Overview']]
-regExp_patient = [['Last Name', 'Plan Summary'], ['Plan Name', 'Deliverable']]
+    def writeReport(self):
+        majorChecks = '\n'+'VERIFICATIONS MAJEURES : '
+        minChecks = '\n'+'VERIFICATIONS MINEURES : '
+        self.all_major_messages.insert(0, majorChecks)
+        self.all_minor_messages .insert(0, minChecks)
+        finalList = self.all_major_messages + self.all_minor_messages 
+        finalString = '\n\n'.join([str(i) for i in finalList])
+        fileName = self.outputDirectory+'ExportCK-' + str(self.patient_name)+'.txt'
+        MyFile = open(fileName, 'w')
+        MyFile.writelines(finalString)
+        MyFile.close()
+        # print(finalString)
 
-i_patient_data = get_pageIndex_withRegExp(moPDF, chapter1)
-list_patient_data = convert_PDFpage_ToStringList(moPDF, i_patient_data)
+    def mainExportFunction(self):
+        i_patient_data = get_pageIndex_withRegExp(self.moPDF, self.chapter1)
+        list_patient_data = convert_PDFpage_ToStringList(
+            self.moPDF, i_patient_data)
 
-i_CT_data = get_pageIndex_withRegExp(moPDF, chapter2)
-list_CT_data_protocol = convert_PDFpage_ToStringList(moPDF, i_CT_data)
-# print(list_CT_data_protocol)
+        i_CT_data = get_pageIndex_withRegExp(self.moPDF, self.chapter2)
+        list_CT_data_protocol = convert_PDFpage_ToStringList(
+            self.moPDF, i_CT_data)
+        # print(list_CT_data_protocol)
 
+        # Get Page index of pdf using regular express
+        #i0_mosaiq = get_pageIndex_withRegExp(self.moPDF, firstPage)
+        #i0_mp = get_pageIndex_withRegExp(self.mpPDF, firstPage)
 
-# Get Page index of pdf using regular express
-#i0_mosaiq = get_pageIndex_withRegExp(moPDF, firstPage)
-#i0_mp = get_pageIndex_withRegExp(mpPDF, firstPage)
+        i_plan_mosaiq = get_pageIndex_withRegExp(self.moPDF, self.chapter3)
+        i_plan_mp = get_pageIndex_withRegExp(self.mpPDF, self.chapter3)
 
-i_plan_mosaiq = get_pageIndex_withRegExp(moPDF, chapter3)
-i_plan_mp = get_pageIndex_withRegExp(mpPDF, chapter3)
+        # extract and convert the wanted page of the pdf
+        mp_plan_string = convert_PDFpage_ToStringList(self.mpPDF, i_plan_mp)
+        mo_plan_string = convert_PDFpage_ToStringList(
+            self.moPDF, i_plan_mosaiq)
+        #mo_patient_string = convert_PDFpage_ToStringList(self.moPDF, i0_mosaiq)
+        #print(mo_plan_string)
 
-# extract and convert the wanted page of the pdf
-mp_plan_string = convert_PDFpage_ToStringList(mpPDF, i_plan_mp)
-mo_plan_string = convert_PDFpage_ToStringList(moPDF, i_plan_mosaiq)
-#mo_patient_string = convert_PDFpage_ToStringList(moPDF, i0_mosaiq)
-print(mo_plan_string)
+        # print(i0_mosaiq,i0_mp,i_plan_mosaiq,i_plan_mp)
+        major_CT_data = extractCTData(list_CT_data_protocol, self.regExp_CT)
+        major_patient_data, self.patient_name = extractPatientData(
+            list_patient_data, self.regExp_patient)
+        major_plan_data, minor_plan_data = extract_dataPlan(
+            mo_plan_string, self.list_data_plan)
+        # identical date plan saved between multiplan and mosaiq ? date_output [True/False, mp_datePlan, mo_datePlan]
+        row_date_data, date_output = compare_date(
+            mp_plan_string, mo_plan_string, self.list_forDate)
 
+        message_CT_major = makeReadableMessage(major_CT_data)
+        message_date_major = makeReadableMessage(date_output)
+        message_patient_major = makeReadableMessage(major_patient_data)
+        message_plan_minor = makeReadableMessage(minor_plan_data)
+        message_plan_major = makeReadableMessage(major_plan_data)
 
-# print(i0_mosaiq,i0_mp,i_plan_mosaiq,i_plan_mp)
-major_CT_data = extractCTData(list_CT_data_protocol, regExp_CT)
-major_patient_data, patient_name_Output_file = extractPatientData(
-    list_patient_data, regExp_patient)
-major_plan_data, minor_plan_data = extract_dataPlan(
-    mo_plan_string, list_data_plan)
-# identical date plan saved between multiplan and mosaiq ? date_output [True/False, mp_datePlan, mo_datePlan]
-row_date_data, date_output = compare_date(
-    mp_plan_string, mo_plan_string, list_forDate)
-
-message_CT_major = makeReadableMessage(major_CT_data)
-message_date_major = makeReadableMessage(date_output)
-message_patient_major = makeReadableMessage(major_patient_data)
-message_plan_minor = makeReadableMessage(minor_plan_data)
-message_plan_major = makeReadableMessage(major_plan_data)
-
-all_major_messages = [message_date_major, message_patient_major,
-                      message_plan_major, message_CT_major]
-all_minor_messages = [message_plan_minor]
-'''
-all_major_messages = [message_date_major, message_patient_major,
-                       message_CT_major]
-all_minor_messages = []'''
-writeFile(all_major_messages, all_minor_messages, patient_name_Output_file)
-# print(date_output)
-# print(mp_plan_string)
-
-
-def Extract_MainPage_toStringList(myfile, initialPage):
-    reader = PdfFileReader(myfile)
-    num_of_pages = reader.numPages
-    mainPageIndex = 3
-    indexMainPage = initialPage + mainPageIndex
-    txt = reader.getPage(actualMainPageIndex).extractText()
-    return txt.splitlines()
-
-
-def Fitted_MosaiqPDF_toMultiplanPDF(myfile, numberOfPages, start):
-    file_base_name = myfile.replace('.pdf', '')
-    mosaiq_subset = '{0}_subset.pdf'.format(file_base_name)
-    reader = PdfFileReader(myfile)
-    pages = list(range(start, start+numberOfPages))
-    pdf_writer = PdfFileWriter()
-    for page_num in pages:
-        pdf_writer.addPage(reader.getPage(page_num))
-    with open(mosaiq_subset, 'wb') as f:
-        pdf_writer.write(f)
-        f.close()
-    return mosaiq_subset
-
-
-def Get_MultiplanPDF_NumberOfPages(myfile):
-    reader = PdfFileReader(myfile)
-    num_of_pages = reader.numPages
-    print(reader.documentInfo)
-    # txt=reader.getPage(0-3).extractText()
-    return num_of_pages
-
-
-'''
-nPages = Get_MultiplanPDF_NumberOfPages('PlanOverview.pdf')
-
-print('Number of pages: ' + str(nPages))
-Mosaiq_file= Fitted_MosaiqPDF_toMultiplanPDF('Mosaiq.pdf',nPages,1)
-nPages = Get_MultiplanPDF_NumberOfPages(Mosaiq_file)
-print('Number of pages: ' + str(nPages))
-'''
+        self.all_major_messages = [message_date_major, message_patient_major,
+                              message_plan_major, message_CT_major]
+        self.all_minor_messages = [message_plan_minor]
+        '''
+        all_major_messages = [message_date_major, message_patient_major,
+                            message_CT_major]
+        all_minor_messages = []'''
+        #writeFile(self.all_major_messages, self.all_minor_messages,
+        #          self.patient_name)
+        # print(date_output)
+        # print(mp_plan_string)
