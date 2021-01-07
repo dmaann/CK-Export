@@ -57,14 +57,14 @@ def get_stringList(stringList, startIdx, endIdx):
 
 def compare_date(planString, moPlanString, regExpDate):
     idx = get_startEndIndex_withRegExp(planString, regExpDate)
-    #print(idx)
+    # print(idx)
     #n = range(idx[0], idx[1])
     mp_date = get_regExp_fromStringList(planString, idx[0]+2, idx[1])
     mo_date = get_regExp_fromStringList(moPlanString, idx[0]+2, idx[1])
     #mp_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
     #mo_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
-    #print(mp_date)
-    #print(mo_date)
+    # print(mp_date)
+    # print(mo_date)
     boolean = True
     if mp_date == mo_date:
         writableOutput = ['Date sauvegarde du plan identiques ? : ' + str(
@@ -166,7 +166,7 @@ def extractPatientData(patientString, regExpList):
     #print(name, '\n', id_, '\n', plan_name, '\n', status)
     majorCheck = [name, id_, plan_name, status]
     # print(majorCheck)
-    return majorCheck, nameForOutputFile
+    return majorCheck, nameForOutputFile, plan_name
 
 
 def extractCTData(CTString, regExpList):
@@ -215,15 +215,17 @@ class ExportCyberknife:
         self.all_major_messages = []
         self.all_minor_messages = []
         self.patient_name = ''
+        self.plan_name = ''
 
     def writeReport(self):
         majorChecks = '\n'+'VERIFICATIONS MAJEURES : '
         minChecks = '\n'+'VERIFICATIONS MINEURES : '
         self.all_major_messages.insert(0, majorChecks)
         self.all_minor_messages .insert(0, minChecks)
-        finalList = self.all_major_messages + self.all_minor_messages 
+        finalList = self.all_major_messages + self.all_minor_messages
         finalString = '\n\n'.join([str(i) for i in finalList])
-        fileName = self.outputDirectory+'ExportCK-' + str(self.patient_name)+'.txt'
+        fileName = self.outputDirectory + \
+            'ExportCK-' + str(self.patient_name)+'-'+str(self.plan_name)+'.txt'
         MyFile = open(fileName, 'w')
         MyFile.writelines(finalString)
         MyFile.close()
@@ -251,11 +253,11 @@ class ExportCyberknife:
         mo_plan_string = convert_PDFpage_ToStringList(
             self.moPDF, i_plan_mosaiq)
         #mo_patient_string = convert_PDFpage_ToStringList(self.moPDF, i0_mosaiq)
-        #print(mo_plan_string)
+        # print(mo_plan_string)
 
         # print(i0_mosaiq,i0_mp,i_plan_mosaiq,i_plan_mp)
         major_CT_data = extractCTData(list_CT_data_protocol, self.regExp_CT)
-        major_patient_data, self.patient_name = extractPatientData(
+        major_patient_data, self.patient_name, self.plan_name = extractPatientData(
             list_patient_data, self.regExp_patient)
         major_plan_data, minor_plan_data = extract_dataPlan(
             mo_plan_string, self.list_data_plan)
@@ -270,13 +272,13 @@ class ExportCyberknife:
         message_plan_major = makeReadableMessage(major_plan_data)
 
         self.all_major_messages = [message_date_major, message_patient_major,
-                              message_plan_major, message_CT_major]
+                                   message_plan_major, message_CT_major]
         self.all_minor_messages = [message_plan_minor]
         '''
         all_major_messages = [message_date_major, message_patient_major,
                             message_CT_major]
         all_minor_messages = []'''
-        #writeFile(self.all_major_messages, self.all_minor_messages,
+        # writeFile(self.all_major_messages, self.all_minor_messages,
         #          self.patient_name)
         # print(date_output)
         # print(mp_plan_string)
