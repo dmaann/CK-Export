@@ -160,13 +160,16 @@ def extractPatientData(patientString, regExpList):
         patientString, idx_status[0], idx_status[1]+1)
     idx_position = [0, 1]
     idx_position.extend(list(range(4, len(plan_status)-1)))
+    #print(idx_position)
+    #print(plan_status)
     plan_name = extract_namedValue(plan_status, idx_position)
+    plan_nameForOutputFile = extract_namedValue(plan_status,[4,5,6,7])
     # print(plan_status)
     status = extract_namedValue(plan_status, [2, 3, len(plan_status)-1])
     #print(name, '\n', id_, '\n', plan_name, '\n', status)
     majorCheck = [name, id_, plan_name, status]
     # print(majorCheck)
-    return majorCheck, nameForOutputFile, plan_name
+    return majorCheck, nameForOutputFile, plan_nameForOutputFile
 
 
 def extractCTData(CTString, regExpList):
