@@ -1,15 +1,16 @@
 import os
 import shutil as sh
-from exportCK import ExportCyberknife
+from lib.exportCK import ExportCyberknife
 
 
 def main():
     workedDirectory = "PDF"
     outputDirectory = "../Reports/"
-    trashDirectory = "../trash/"
+    trashDirectory = "../Trash/"
 
     try:
         os.chdir(workedDirectory)
+        #print(os.getcwd())
     except FileNotFoundError:
         os.mkdir(workedDirectory)
         print('the pdf file is now created: create patient folder with the pdf of mosaiq and muliplan')
@@ -18,18 +19,21 @@ def main():
         os.mkdir(outputDirectory)
     except FileExistsError:
         pass
+
     try:
         os.mkdir(trashDirectory)
     except FileExistsError:
         pass
+
     full_dir = []
     patient_dir = []
     for root, dirs, files in os.walk('.', topdown=True):
         tup = (root[2:], files)
-        patient_dir.append(dirs) 
-        # print(tup)
+        patient_dir.append(dirs)
+        #print(tup)
         full_dir.append(tup)
-    #print(patient_dir[0])
+    # print(patient_dir[0])
+
     del full_dir[0]
     # print(full_dir)
     for path in full_dir:
@@ -52,11 +56,15 @@ def main():
                   workedDirectory + path[0])
         classExportCK = ExportCyberknife(moPDF, mpPDF, outputDirectory)
         classExportCK.mainExportFunction()
-        classExportCK.writeReport()
+        classExportCK.configureWriteTxt_Report()
+        classExportCK.writePDF_Report()
         # print(moPDF, mpPDF)
-    del classExportCK
+    try:
+        del classExportCK
+    except:
+        pass
     for d in patient_dir[0]:
-        sh.move(d,trashDirectory+d)
+        sh.move(d, trashDirectory+d)
 
 
 if __name__ == "__main__":

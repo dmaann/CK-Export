@@ -1,11 +1,11 @@
 from PyPDF2 import PdfFileReader, PdfFileWriter
-import csv
 import re
+from fpdf import FPDF
 
 
 def convert_PDFpage_ToStringList(myfile, pageIndex):
     reader = PdfFileReader(myfile)
-    num_of_pages = reader.numPages
+    #num_of_pages = reader.numPages
     pages = list(range(0, reader.numPages))
     txt = reader.getPage(pages[pageIndex]).extractText()
     return txt.splitlines()
@@ -68,7 +68,7 @@ def compare_date(planString, moPlanString, regExpDate):
     boolean = True
     if mp_date == mo_date:
         writableOutput = ['Date sauvegarde du plan identiques ? : ' + str(
-            boolean), 'Date du pdf de Multiplan : ' + str(mp_date), 'Date du pdf Mosaiq :       ' + str(mo_date)]
+            boolean), 'Date du pdf de Multiplan : ' + str(mp_date), 'Date du pdf Mosaiq :        ' + str(mo_date)]
     else:
         boolean = False
         writableOutput = ['PROBLEME : VERIFIER LA CONCORDANCE DU PLAN ET DES PDF', '', 'Date sauvegarde du plan identiques ? : ' + str(boolean),
@@ -160,10 +160,10 @@ def extractPatientData(patientString, regExpList):
         patientString, idx_status[0], idx_status[1]+1)
     idx_position = [0, 1]
     idx_position.extend(list(range(4, len(plan_status)-1)))
-    #print(idx_position)
-    #print(plan_status)
+    # print(idx_position)
+    # print(plan_status)
     plan_name = extract_namedValue(plan_status, idx_position)
-    plan_nameForOutputFile = extract_namedValue(plan_status,[4,5,6,7])
+    plan_nameForOutputFile = extract_namedValue(plan_status, [4, 5, 6, 7])
     # print(plan_status)
     status = extract_namedValue(plan_status, [2, 3, len(plan_status)-1])
     #print(name, '\n', id_, '\n', plan_name, '\n', status)
@@ -219,18 +219,32 @@ class ExportCyberknife:
         self.all_minor_messages = []
         self.patient_name = ''
         self.plan_name = ''
+        self.finalString = ''
+        self.finalList = ''
+        self.fileName = ''
 
-    def writeReport(self):
+    def writePDF_Report(self):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        f = open(self.fileName, "r")
+        for x in f:
+            pdf.cell(100, 5, txt=x, ln=2, align='l')
+        f.close()
+        pdf.output(self.fileName)
+
+    def configureWriteTxt_Report(self):
         majorChecks = '\n'+'VERIFICATIONS MAJEURES : '
         minChecks = '\n'+'VERIFICATIONS MINEURES : '
         self.all_major_messages.insert(0, majorChecks)
+        #print(self.all_major_messages)
         self.all_minor_messages .insert(0, minChecks)
-        finalList = self.all_major_messages + self.all_minor_messages
-        finalString = '\n\n'.join([str(i) for i in finalList])
-        fileName = self.outputDirectory + \
-            'ExportCK-' + str(self.patient_name)+'-'+str(self.plan_name)+'.txt'
-        MyFile = open(fileName, 'w')
-        MyFile.writelines(finalString)
+        self.finalList = self.all_major_messages + self.all_minor_messages
+        self.finalString = '\n\n'.join([str(i) for i in self.finalList])
+        self.fileName = self.outputDirectory + \
+            'ExportCK-' + str(self.patient_name)+'-'+str(self.plan_name)+'.pdf'
+        MyFile = open(self.fileName, 'w')
+        MyFile.writelines(self.finalString)
         MyFile.close()
         # print(finalString)
 
