@@ -40,8 +40,17 @@ def main():
         files = path[1]
         moPDF = 'Path to the mosaiq pdf file'
         mpPDF = 'Path to the multiplan pdf file'
-        if len(files) == 2:
-            # print(files[0])
+        if len(files) == 2 or len(files) ==3:
+            #print(files)
+            for f in files:
+                if f == "Thumbs.db":
+                    #os.remove(f)
+                    try:
+                        os.remove(path[0]+'/'+f)
+                    except:
+                        pass
+                    #print(f)
+                    files.remove(f)
             if files[0] == 'PlanOverview.pdf':
                 mpPDF = path[0]+'/'+files[0]
                 moPDF = path[0]+'/'+files[1]
