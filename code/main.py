@@ -75,6 +75,7 @@ def main():
             except:
                 pass
             for d in patient_dir[0]:
+                print(d)
                 sh.move(d, trashDirectory+d)
         elif len(files) == 0 or len(files) == 1:
             pass
