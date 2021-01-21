@@ -8,13 +8,18 @@ def main():
     outputDirectory = "../Reports/"
     trashDirectory = "../Trash/"
 
+    '''try:
+        os.mkdir(workedDirectory)
+    except(FileExistsError):
+        pass
+    '''
     try:
         os.chdir(workedDirectory)
         #print(os.getcwd())
     except FileNotFoundError:
         os.mkdir(workedDirectory)
         print('the pdf file is now created: create patient folder with the pdf of mosaiq and muliplan')
-
+   
     try:
         os.mkdir(outputDirectory)
     except FileExistsError:
@@ -60,20 +65,24 @@ def main():
                 else:
                     mpPDF = path[0]+'/'+files[1]
                     moPDF = path[0]+'/'+files[0]
+            classExportCK = ExportCyberknife(moPDF, mpPDF, outputDirectory)
+            classExportCK.mainExportFunction()
+            classExportCK.configureWriteTxt_Report()
+            classExportCK.writePDF_Report()
+            # print(moPDF, mpPDF)
+            try:
+                del classExportCK
+            except:
+                pass
+            for d in patient_dir[0]:
+                sh.move(d, trashDirectory+d)
+        elif len(files) == 0 or len(files) == 1:
+            pass
         else:
             print('Two pdf are required in the folder',
                   workedDirectory + path[0])
-        classExportCK = ExportCyberknife(moPDF, mpPDF, outputDirectory)
-        classExportCK.mainExportFunction()
-        classExportCK.configureWriteTxt_Report()
-        classExportCK.writePDF_Report()
-        # print(moPDF, mpPDF)
-    try:
-        del classExportCK
-    except:
-        pass
-    for d in patient_dir[0]:
-        sh.move(d, trashDirectory+d)
+    os.chdir('..')
+        
 
 
 if __name__ == "__main__":
