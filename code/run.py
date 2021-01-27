@@ -24,7 +24,7 @@ print(f"START at {datetime.datetime.now()}")
 
 while not is_shutdown:
     print('.', end='', flush=True)
-    time.sleep(1)
+    time.sleep(20)
     main()
      # print(os.getcwd())
   
