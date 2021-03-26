@@ -252,7 +252,7 @@ class ExportCyberknife:
         i_patient_data = get_pageIndex_withRegExp(self.moPDF, self.chapter1)
         list_patient_data = convert_PDFpage_ToStringList(
             self.moPDF, i_patient_data)
-
+        print(list_patient_data) 
         i_CT_data = get_pageIndex_withRegExp(self.moPDF, self.chapter2)
         list_CT_data_protocol = convert_PDFpage_ToStringList(
             self.moPDF, i_CT_data)

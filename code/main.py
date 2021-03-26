@@ -4,7 +4,8 @@ from lib.exportCK import ExportCyberknife
 
 
 def main():
-    workedDirectory = "../PDF"
+    workedDirectory = "PDF"
+    '''workedDirectory = "...PDF" '''
     outputDirectory = "../Reports/"
     trashDirectory = "../Trash/"
 
@@ -82,7 +83,7 @@ def main():
         else:
             print('Two pdf are required in the folder',
                   workedDirectory + path[0])
-    #os.chdir('..')
+    os.chdir('..')
         
 
 
