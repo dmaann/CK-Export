@@ -4,7 +4,8 @@ from lib.exportCK import ExportCyberknife
 
 
 def main():
-    workedDirectory = "../PDF"
+    workedDirectory = "PDF"
+    '''workedDirectory = "...PDF" '''
     outputDirectory = "../Reports/"
     trashDirectory = "../Trash/"
 
@@ -65,6 +66,7 @@ def main():
                 else:
                     mpPDF = path[0]+'/'+files[1]
                     moPDF = path[0]+'/'+files[0]
+            print('iCI, ', mpPDF)
             classExportCK = ExportCyberknife(moPDF, mpPDF, outputDirectory)
             classExportCK.mainExportFunction()
             classExportCK.configureWriteTxt_Report()

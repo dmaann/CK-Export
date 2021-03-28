@@ -5,7 +5,7 @@ from fpdf import FPDF
 
 def convert_PDFpage_ToStringList(myfile, pageIndex):
     reader = PdfFileReader(myfile)
-    #num_of_pages = reader.numPages
+    # num_of_pages = reader.numPages
     pages = list(range(0, reader.numPages))
     txt = reader.getPage(pages[pageIndex]).extractText()
     return txt.splitlines()
@@ -23,18 +23,18 @@ def get_pageIndex_withRegExp(myfile, regExp):
     reader = PdfFileReader(myfile)
     num_of_pages = reader.numPages
     pages = list(range(0, reader.numPages))
-    # print(pages)
+    #  print(pages)
     n = 0
     while True:
         txt = reader.getPage(pages[n]).extractText()
         txt_lineList = txt.splitlines()
         # print(txt_lineList)
         try:
-            # print(txt_lineList[0],'--',txt_lineList[1],'--',txt_lineList[2])
+          #  print(txt_lineList[0],'--',txt_lineList[1],'--',txt_lineList[2])
             if regExp[1] == 'not':
-                if txt_lineList[0] == regExp[0]:
+                if txt_lineList[1] == regExp[0]:
                     break
-            if (txt_lineList[0] == regExp[0] and txt_lineList[2] == regExp[1]):
+            if (txt_lineList[1] == regExp[0] and txt_lineList[3] == regExp[1]):
                 break
         except IndexError:
             pass
@@ -58,11 +58,11 @@ def get_stringList(stringList, startIdx, endIdx):
 def compare_date(planString, moPlanString, regExpDate):
     idx = get_startEndIndex_withRegExp(planString, regExpDate)
     # print(idx)
-    #n = range(idx[0], idx[1])
+    # n = range(idx[0], idx[1])
     mp_date = get_regExp_fromStringList(planString, idx[0]+2, idx[1])
     mo_date = get_regExp_fromStringList(moPlanString, idx[0]+2, idx[1])
-    #mp_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
-    #mo_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
+    # mp_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
+    # mo_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
     # print(mp_date)
     # print(mo_date)
     boolean = True
@@ -166,7 +166,7 @@ def extractPatientData(patientString, regExpList):
     plan_nameForOutputFile = extract_namedValue(plan_status, [4, 5, 6, 7])
     # print(plan_status)
     status = extract_namedValue(plan_status, [2, 3, len(plan_status)-1])
-    #print(name, '\n', id_, '\n', plan_name, '\n', status)
+    # print(name, '\n', id_, '\n', plan_name, '\n', status)
     majorCheck = [name, id_, plan_name, status]
     # print(majorCheck)
     return majorCheck, nameForOutputFile, plan_nameForOutputFile
@@ -205,8 +205,8 @@ class ExportCyberknife:
         self.moPDF = moPDF
         self.mpPDF = mpPDF
         self.outputDirectory = outputDirectory
-        #firstPage = ['Plan Overview', 'not']
-        self.chapter1 = ['Chapter ', 'Overview']
+        # firstPage = ['Plan Overview', 'not']
+        self.chapter1 = ['Patient Name:', 'Medical ID:']
         self.chapter2 = ['DICOM Series', '2: ']
         self.chapter3 = ['Chapter ', 'Plan']
         self.list_forDate = ['Date Plan Saved', 'Created in Version']
@@ -237,7 +237,7 @@ class ExportCyberknife:
         majorChecks = '\n'+'VERIFICATIONS MAJEURES : '
         minChecks = '\n'+'VERIFICATIONS MINEURES : '
         self.all_major_messages.insert(0, majorChecks)
-        #print(self.all_major_messages)
+        # print(self.all_major_messages)
         self.all_minor_messages .insert(0, minChecks)
         self.finalList = self.all_major_messages + self.all_minor_messages
         self.finalString = '\n\n'.join([str(i) for i in self.finalList])
@@ -252,15 +252,15 @@ class ExportCyberknife:
         i_patient_data = get_pageIndex_withRegExp(self.moPDF, self.chapter1)
         list_patient_data = convert_PDFpage_ToStringList(
             self.moPDF, i_patient_data)
-
+        print(list_patient_data)
         i_CT_data = get_pageIndex_withRegExp(self.moPDF, self.chapter2)
         list_CT_data_protocol = convert_PDFpage_ToStringList(
             self.moPDF, i_CT_data)
         # print(list_CT_data_protocol)
 
         # Get Page index of pdf using regular express
-        #i0_mosaiq = get_pageIndex_withRegExp(self.moPDF, firstPage)
-        #i0_mp = get_pageIndex_withRegExp(self.mpPDF, firstPage)
+        # i0_mosaiq = get_pageIndex_withRegExp(self.moPDF, firstPage)
+        # i0_mp = get_pageIndex_withRegExp(self.mpPDF, firstPage)
 
         i_plan_mosaiq = get_pageIndex_withRegExp(self.moPDF, self.chapter3)
         i_plan_mp = get_pageIndex_withRegExp(self.mpPDF, self.chapter3)
@@ -269,7 +269,7 @@ class ExportCyberknife:
         mp_plan_string = convert_PDFpage_ToStringList(self.mpPDF, i_plan_mp)
         mo_plan_string = convert_PDFpage_ToStringList(
             self.moPDF, i_plan_mosaiq)
-        #mo_patient_string = convert_PDFpage_ToStringList(self.moPDF, i0_mosaiq)
+        # mo_patient_string = convert_PDFpage_ToStringList(self.moPDF, i0_mosaiq)
         # print(mo_plan_string)
 
         # print(i0_mosaiq,i0_mp,i_plan_mosaiq,i_plan_mp)
@@ -299,3 +299,12 @@ class ExportCyberknife:
         #          self.patient_name)
         # print(date_output)
         # print(mp_plan_string)
+
+import os
+print(os.getcwd())
+os.chdir('/run/user/1001/gvfs/smb-share:server=sd00d35,share=dosimetrie/CyberKnife/06_CK-Export/code/lib/')
+mpPDF= "PlanOverview.pdf"
+moPDF= "PlanOverview.pdf"
+outputDirectory="PDF"
+classExportCK = ExportCyberknife(moPDF, mpPDF, outputDirectory)
+classExportCK.mainExportFunction()

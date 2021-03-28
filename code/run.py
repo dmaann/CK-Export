@@ -1,4 +1,4 @@
-import scipy.signal as signal
+import signal
 import time
 import datetime
 from main import main
@@ -24,7 +24,7 @@ print(f"START at {datetime.datetime.now()}")
 
 while not is_shutdown:
     print('.', end='', flush=True)
-    time.sleep(20)
+    time.sleep(10)
     main()
      # print(os.getcwd())
   
