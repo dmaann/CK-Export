@@ -1,4 +1,4 @@
-import signal
+import scipy.signal as signal
 import time
 import datetime
 from main import main
