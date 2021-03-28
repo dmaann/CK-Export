@@ -16,7 +16,7 @@ def main():
     '''
     try:
         os.chdir(workedDirectory)
-        print(os.getcwd())
+        #print(os.getcwd())
     except FileNotFoundError:
         os.mkdir(workedDirectory)
         print('the pdf file is now created: create patient folder with the pdf of mosaiq and muliplan')
@@ -66,7 +66,6 @@ def main():
                 else:
                     mpPDF = path[0]+'/'+files[1]
                     moPDF = path[0]+'/'+files[0]
-            print('iCI, ', mpPDF)
             classExportCK = ExportCyberknife(moPDF, mpPDF, outputDirectory)
             classExportCK.mainExportFunction()
             classExportCK.configureWriteTxt_Report()
@@ -78,7 +77,11 @@ def main():
                 pass
             for d in patient_dir[0]:
                 print(d)
-                sh.move(d, trashDirectory+d)
+                try:
+                    sh.move(d, trashDirectory+d)
+                except:
+                    sh.rmtree(trashDirectory+d)
+                    sh.move(d, trashDirectory+d)
         elif len(files) == 0 or len(files) == 1:
             pass
         else:
