@@ -23,12 +23,12 @@ def get_pageIndex_withRegExp(myfile, regExp):
     reader = PdfFileReader(myfile)
     num_of_pages = reader.numPages
     pages = list(range(0, reader.numPages))
-    #  print(pages)
+    #print(pages)
     n = 0
     while True:
         txt = reader.getPage(pages[n]).extractText()
         txt_lineList = txt.splitlines()
-        # print(txt_lineList)
+        #print(txt_lineList)
         try:
           #  print(txt_lineList[0],'--',txt_lineList[1],'--',txt_lineList[2])
             if regExp[1] == 'not':
@@ -59,8 +59,8 @@ def compare_date(planString, moPlanString, regExpDate):
     idx = get_startEndIndex_withRegExp(planString, regExpDate)
     # print(idx)
     # n = range(idx[0], idx[1])
-    mp_date = get_regExp_fromStringList(planString, idx[0]+2, idx[1])
-    mo_date = get_regExp_fromStringList(moPlanString, idx[0]+2, idx[1])
+    mp_date = get_regExp_fromStringList(planString, idx[0]+1, idx[1])
+    mo_date = get_regExp_fromStringList(moPlanString, idx[0]+1, idx[1])
     # mp_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
     # mo_date_msg = get_regExp_fromStringList(planString, idx[0], idx[1])
     # print(mp_date)
@@ -83,60 +83,57 @@ def extract_namedValue(stringList, listIndex):
 
 
 def extract_dataPlan(planString, regExpPlan):
-    idx_frac = get_startEndIndex_withRegExp(planString, regExpPlan[0])
-    path_fraction_colli = get_stringList(
-        planString, idx_frac[0], idx_frac[1])
-    fraction = extract_namedValue(path_fraction_colli, [0, 1, 6])
-    path = extract_namedValue(path_fraction_colli, list(
-        range(len(path_fraction_colli)-3, len(path_fraction_colli))))
-    collimator = extract_namedValue(path_fraction_colli, [2, 3, 7, 8])
-    '''print(fraction, '\n', path, '\n', collimator)
-        print(path_fraction_colli)'''
+    idx_ = get_startEndIndex_withRegExp(planString, regExpPlan[0])
+    path_ = get_stringList(planString, idx_[0], idx_[1])
+  
+    path = extract_namedValue(path_, [6,7,5])
+    #print(path)
+    collimator = extract_namedValue(path_, [0, 1, 2, 3])
+    #print(collimator)
+    tracking = extract_namedValue(path_, [len(path_)-1,len(path_)-2])
+    #print(tracking)
+    idx_ = get_startEndIndex_withRegExp(planString, regExpPlan[1])
+    path_ = get_stringList(planString, idx_[0], idx_[1])
+    algorithm = extract_namedValue(path_, [0,1])
+    #print(algorithm)
+    resolution = extract_namedValue(path_, [len(path_)-2,len(path_)-1])
+    #print(resolution)
+    scaling = extract_namedValue(path_, [2,3])
+    #print(scaling)
+    idx_ = get_startEndIndex_withRegExp(planString, regExpPlan[2])
+    path_ = get_stringList(planString, idx_[0], idx_[1])
+    optimizer= extract_namedValue(path_, [0,1])
+    #print(optimizer)
+    idx_ = get_startEndIndex_withRegExp(planString, regExpPlan[3])
+    path_ = get_stringList(planString, idx_[0], idx_[1])
+    fraction = extract_namedValue(path_, [2, 7])    
+    dose = extract_namedValue(path_, [1,6])
+    prescription = extract_namedValue(path_,[0,5])
+    MUs= extract_namedValue(path_,[4,9])
+    #print(fraction, '\n', dose, '\n', prescription, '\n', MUs)
+    time = extract_namedValue(path_, [len(path_)-2,len(path_)-1])
 
-    idx_tracking = get_startEndIndex_withRegExp(
-        planString, regExpPlan[1])
-    tracking_ = get_stringList(
-        planString, idx_tracking[0], idx_tracking[1])
-    tracking = extract_namedValue(
-        tracking_, list(range(0, len(tracking_))))
-    # print(tracking)
-
-    idx_dose_isodose = get_startEndIndex_withRegExp(
-        planString, regExpPlan[2])
-    dose_isodose = get_stringList(
-        planString, idx_dose_isodose[0], idx_dose_isodose[1])
-    dose = extract_namedValue(dose_isodose, [0, 7, 4, 2])
-    isodose = extract_namedValue(dose_isodose, [6, 7, 8, 5])
-    '''print(dose, '\n', isodose)
-        print(dose_isodose)'''
-
-    idx_time_beam = get_startEndIndex_withRegExp(planString, regExpPlan[4])
-    time_beam = get_stringList(
-        planString, idx_time_beam[0], idx_time_beam[1])
-    resolution = extract_namedValue(time_beam, list(range(0, 3)))
-    time = extract_namedValue(time_beam, [11, 1, 15, 13])
-    beam = extract_namedValue(time_beam, [9, 1, 8])
-    '''print(resolution, '\n', time, '\n', beam)
-        print(time_beam)'''
+    idx_ = get_startEndIndex_withRegExp(planString, regExpPlan[4])
+    path_ = get_stringList(planString, idx_[0], idx_[1])
+    beam = extract_namedValue(path_, list(range(0, len(path_))))
+    print(resolution, '\n', time, '\n', beam)
 
     idx_algo_segment = get_startEndIndex_withRegExp(
         planString, regExpPlan[3])
     algo_segment = get_stringList(
         planString, idx_algo_segment[0], idx_algo_segment[1])
-    algorithm = extract_namedValue(algo_segment, list(range(0, 3)))
-    scaling = extract_namedValue(algo_segment, list(range(3, 6)))
     r = re.compile(".*MLC")
     isMLC = list(filter(r.match, planString))
     if not isMLC:  # empty list, i.e. fixed collimator
-        minorPagePlan = [collimator, path, algorithm,
-                         resolution, time, beam]
+        minorPagePlan = [collimator, path, algorithm,optimizer,
+                         resolution, MUs,time, beam]
     else:  # MLC collimator
         segment = extract_namedValue(algo_segment, list(range(6, 9)))
-        minorPagePlan = [collimator, path, algorithm,
-                         resolution, time, beam, segment]
+        minorPagePlan = [collimator, path, algorithm,optimizer,
+                         resolution, MUs, time, beam, segment]
     '''print(algorithm, '\n', scaling, '\n', segment)
         print(algo_segment)'''
-    majorPagePlan = [fraction, dose, isodose, tracking, scaling]
+    majorPagePlan = [fraction, dose, prescription, tracking, scaling]
     # print(majorPagePlan)
     # print(minorPagePlan)
     return majorPagePlan, minorPagePlan
@@ -147,26 +144,22 @@ def extractPatientData(patientString, regExpList):
         patientString, regExpList[0])
     patient_data = get_stringList(
         patientString, idx_patient[0], idx_patient[1])
-    # print(patient_data)
-    name = extract_namedValue(patient_data, [0, 1, 2, 3, 4, 8])
-    nameForOutputFile = extract_namedValue(patient_data, [2])
-    # print(nameForOutputFile)
+    #print(patient_data)
+    name = extract_namedValue(patient_data, [0, 1])
+    #print(name)
+    nameForOutputFile = extract_namedValue(patient_data, [1])
+    #print(nameForOutputFile)
     id_ = extract_namedValue(patient_data, list(
-        range(len(patient_data)-4, len(patient_data)-1)))
-    plan_name = extract_namedValue(patient_data, [5, 6, 7])
+        range(len(patient_data)-2, len(patient_data))))
 
     idx_status = get_startEndIndex_withRegExp(patientString, regExpList[1])
     plan_status = get_stringList(
         patientString, idx_status[0], idx_status[1]+1)
-    idx_position = [0, 1]
-    idx_position.extend(list(range(4, len(plan_status)-1)))
-    # print(idx_position)
+    plan_name = extract_namedValue(plan_status, [0,len(plan_status)-4])
     # print(plan_status)
-    plan_name = extract_namedValue(plan_status, idx_position)
-    plan_nameForOutputFile = extract_namedValue(plan_status, [4, 5, 6, 7])
-    # print(plan_status)
-    status = extract_namedValue(plan_status, [2, 3, len(plan_status)-1])
-    # print(name, '\n', id_, '\n', plan_name, '\n', status)
+    plan_nameForOutputFile = extract_namedValue(plan_status, [len(plan_status)-4])
+    status = extract_namedValue(plan_status, [1, len(plan_status)-3])
+    #print(name, '\n', id_, '\n', plan_name, '\n', status)
     majorCheck = [name, id_, plan_name, status]
     # print(majorCheck)
     return majorCheck, nameForOutputFile, plan_nameForOutputFile
@@ -176,18 +169,19 @@ def extractCTData(CTString, regExpList):
     idx_CT_date = get_startEndIndex_withRegExp(CTString, regExpList[0])
     CT_date = get_stringList(CTString, idx_CT_date[0], idx_CT_date[1])
     # print(CT_date)
-    idx_position = [0, 1]
-    idx_position.extend(list(range(6, len(CT_date)-1)))
+    idx_position = [0]
+    idx_position.extend(list(range(4, len(CT_date)-1)))
+    #print(idx_position)
     date = extract_namedValue(CT_date, idx_position)
-    # print(date)
+    #print(date)
     idx_CT_protocol = get_startEndIndex_withRegExp(CTString, regExpList[1])
     CT_protocol = get_stringList(
         CTString, idx_CT_protocol[0], idx_CT_protocol[1])
     # print(CT_protocol)
-    idx_position = [2, 3]
-    idx_position.extend(list(range(6, len(CT_protocol)-2)))
+    idx_position = [0,4,1,5]
+    #idx_position.extend(list(range(6, len(CT_protocol)-2)))
     protocol = extract_namedValue(CT_protocol, idx_position)
-    # print(protocol)
+    #print(protocol)
     majorCheck = [date, protocol]
     # print(majorCheck)
     return majorCheck
@@ -207,14 +201,16 @@ class ExportCyberknife:
         self.outputDirectory = outputDirectory
         # firstPage = ['Plan Overview', 'not']
         self.chapter1 = ['Patient Name:', 'Medical ID:']
-        self.chapter2 = ['DICOM Series', '2: ']
-        self.chapter3 = ['Chapter ', 'Plan']
-        self.list_forDate = ['Date Plan Saved', 'Created in Version']
-        self.list_data_plan = [['Planned Fractions', 'HFS'], ['Tracking Method', 'Alignment Center '], [
-            'Prescribed Plan Dose ', 'Reference Point '], ['Optimization Algorithm', 'Page'], ['Dose Calculation Resolution', 'dose Beams']]
-        self.regExp_CT = [['Scan Date', 'hr'], ['Study UID', 'Plan Overview']]
-        self.regExp_patient = [['Last Name', 'Plan Summary'],
-                               ['Plan Name', 'Deliverable']]
+        self.chapter2 = ['X','Z']
+        #self.chapter2 = ['DICOM Series', '2: ']
+        #self.chapter3 = ['Chapter ', 'Plan']
+        self.list_forDate = ['C0410 / C0410','Prescription:']
+        #self.list_forDate = ['Date Plan Saved', 'Created in Version']
+        self.list_data_plan = [['Collimator Type:', 'InTempo Imaging:'],['Dose Calculation Algorithm:','Spacing'],['Optimization Algorithm:', 'Plan Name:'],['Prescription:','Reference'],['Number of Non-zero Beams:','Plan Overview']]
+        #self.regExp_CT = [['Scan Date', 'hr'], ['Study UID', 'Plan Overview']]
+        self.regExp_CT = [['Scan Date', 'Scanner Model:'], ['Series UID/Description', 'Plan Overview']]
+        self.regExp_patient = [['Patient Name:', 'Date Of Birth:'],
+                               ['Plan Name:', 'C0410 / C0410']]
         self.all_major_messages = []
         self.all_minor_messages = []
         self.patient_name = ''
@@ -252,18 +248,18 @@ class ExportCyberknife:
         i_patient_data = get_pageIndex_withRegExp(self.moPDF, self.chapter1)
         list_patient_data = convert_PDFpage_ToStringList(
             self.moPDF, i_patient_data)
-        print(list_patient_data)
+        #print(list_patient_data)
         i_CT_data = get_pageIndex_withRegExp(self.moPDF, self.chapter2)
         list_CT_data_protocol = convert_PDFpage_ToStringList(
             self.moPDF, i_CT_data)
-        # print(list_CT_data_protocol)
+        #print(list_CT_data_protocol)
 
         # Get Page index of pdf using regular express
         # i0_mosaiq = get_pageIndex_withRegExp(self.moPDF, firstPage)
         # i0_mp = get_pageIndex_withRegExp(self.mpPDF, firstPage)
 
-        i_plan_mosaiq = get_pageIndex_withRegExp(self.moPDF, self.chapter3)
-        i_plan_mp = get_pageIndex_withRegExp(self.mpPDF, self.chapter3)
+        i_plan_mosaiq = get_pageIndex_withRegExp(self.moPDF, self.chapter1)
+        i_plan_mp = get_pageIndex_withRegExp(self.mpPDF, self.chapter1)
 
         # extract and convert the wanted page of the pdf
         mp_plan_string = convert_PDFpage_ToStringList(self.mpPDF, i_plan_mp)
@@ -300,11 +296,15 @@ class ExportCyberknife:
         # print(date_output)
         # print(mp_plan_string)
 
-import os
+
+# Debug world for the CK export class
+'''import os
 print(os.getcwd())
-os.chdir('/run/user/1001/gvfs/smb-share:server=sd00d35,share=dosimetrie/CyberKnife/06_CK-Export/code/lib/')
+#os.chdir('/run/user/1001/gvfs/smb-share:server=sd00d35,share=dosimetrie/CyberKnife/06_CK-Export/code/lib/')
+os.chdir('/home/daniel/Documents/CK-Export/code/lib')
 mpPDF= "PlanOverview.pdf"
 moPDF= "PlanOverview.pdf"
 outputDirectory="PDF"
 classExportCK = ExportCyberknife(moPDF, mpPDF, outputDirectory)
 classExportCK.mainExportFunction()
+'''

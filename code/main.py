@@ -16,7 +16,7 @@ def main():
     '''
     try:
         os.chdir(workedDirectory)
-        #print(os.getcwd())
+        print(os.getcwd())
     except FileNotFoundError:
         os.mkdir(workedDirectory)
         print('the pdf file is now created: create patient folder with the pdf of mosaiq and muliplan')
