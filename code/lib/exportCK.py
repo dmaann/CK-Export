@@ -86,9 +86,9 @@ def extract_dataPlan(planString, regExpPlan):
     idx_ = get_startEndIndex_withRegExp(planString, regExpPlan[0])
     path_ = get_stringList(planString, idx_[0], idx_[1])
 
-    path = extract_namedValue(path_, [6, 7, 5])
+    path = extract_namedValue(path_, [8, 9, 7])
     # print(path)
-    collimator = extract_namedValue(path_, [0, 1, 2, 3])
+    collimator = extract_namedValue(path_, [2, 3, 4, 5])
     # print(collimator)
     tracking = extract_namedValue(path_, [len(path_)-1, len(path_)-2])
     # print(tracking)
@@ -204,7 +204,9 @@ class ExportCyberknife:
         self.chapter1 = ['Patient Name:', 'Medical ID:']
         self.chapter2 = ['X', 'Z']
         self.list_forDate = ['C0410 / C0410', 'Prescription:']
-        self.list_data_plan = [['Collimator Type:', 'InTempo Imaging:'], ['Dose Calculation Algorithm:', 'Spacing'], [
+        #self.list_data_plan = [['Collimator Type:', 'InTempo Imaging:'], ['Dose Calculation Algorithm:', 'Spacing'], [
+        #    'Optimization Algorithm:', 'Plan Name:'], ['Prescription:', 'Reference'], ['Number of Non-zero Beams:', 'Plan Overview']]
+        self.list_data_plan = [['Patient Key:', 'InTempo Imaging:'], ['Dose Calculation Algorithm:', 'Spacing'], [
             'Optimization Algorithm:', 'Plan Name:'], ['Prescription:', 'Reference'], ['Number of Non-zero Beams:', 'Plan Overview']]
         self.regExp_CT = [['Scan Date', 'Scanner Model:'],
                           ['Series UID/Description', 'Plan Overview']]
@@ -247,7 +249,7 @@ class ExportCyberknife:
         i_patient_data = get_pageIndex_withRegExp(self.moPDF, self.chapter1)
         list_patient_data = convert_PDFpage_ToStringList(
             self.moPDF, i_patient_data)
-        # print(list_patient_data)
+        print(list_patient_data)
         i_CT_data = get_pageIndex_withRegExp(self.moPDF, self.chapter2)
         list_CT_data_protocol = convert_PDFpage_ToStringList(
             self.moPDF, i_CT_data)
@@ -257,7 +259,7 @@ class ExportCyberknife:
         # extract and convert the wanted page of the pdf
         mp_plan_string = convert_PDFpage_ToStringList(self.mpPDF, i_plan_mp)
         mo_plan_string = list_patient_data
-        # print(mo_plan_string)
+        print(mo_plan_string)
 
         # print(i0_mosaiq,i0_mp,i_plan_mosaiq,i_plan_mp)
         major_CT_data = extractCTData(list_CT_data_protocol, self.regExp_CT)

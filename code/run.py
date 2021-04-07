@@ -28,6 +28,6 @@ while not is_shutdown:
     main()
      # print(os.getcwd())
   
-    #os.chdir("..")
+    os.chdir("..")
 
 print(f"END at {datetime.datetime.now()}")
